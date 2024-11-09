@@ -2,7 +2,6 @@
 import "flowbite";
 import React, { PropsWithChildren, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import { UseAccessMonitor } from "./utils/AccessMonitor";
 type UserState = {
   email: string;

@@ -1,25 +1,16 @@
 "use client";
 import "flowbite";
-import { useRouter } from "next/navigation";
 import React, { useEffect, useState, useRef } from "react";
 import Menu from "../components/Menu";
 import ConfirmModal from "../components/ConfirmModal";
 import "@mdxeditor/editor/style.css";
 import {
   MDXEditor,
-  UndoRedo,
-  BoldItalicUnderlineToggles,
   toolbarPlugin,
-  CodeToggle,
-  CreateLink,
   linkDialogPlugin,
-  ChangeAdmonitionType,
   linkPlugin,
-  BlockTypeSelect,
   codeBlockPlugin,
-  ListsToggle,
   listsPlugin,
-  Separator,
   headingsPlugin,
   quotePlugin,
   thematicBreakPlugin,
@@ -28,7 +19,6 @@ import {
   tablePlugin,
   imagePlugin,
   frontmatterPlugin,
-  sandpackPlugin,
   codeMirrorPlugin,
   directivesPlugin,
   diffSourcePlugin,
@@ -56,14 +46,13 @@ type Doc = {
 
 export default function Home() {
   const modalRef = useRef();
-  const router = useRouter();
   const docsApi = new DocsApi("docs");
   const [loading, setLoading] = useState<boolean>(false);
   const [loadingDoc, setLoadingDoc] = useState<boolean>(false);
   const [selectedDoc, setSelectedDoc] = useState<Doc | Node | null>(null);
   const [savingDoc, setSavingDoc] = useState<boolean>(false);
   const [deletedDoc, setDeletedDoc] = useState<NodeId | null>(null);
-  const [treeInfo, setTreeInfo] = useState<any | null>(
+  const [treeInfo, setTreeInfo] = useState< unknown | null>(
     flattenTree({
       name: "",
       children: [],
@@ -327,7 +316,10 @@ export default function Home() {
                     required
                     value={selectedDoc.title ?? ""}
                     onChange={({ target: { value } }) =>
-                      changeSelectedDoc({ ...selectedDoc, title: value })
+                      changeSelectedDoc({
+                        ...selectedDoc, title: value,
+                        name: ""
+                      })
                     }
                   />
                 </div>
