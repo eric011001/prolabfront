@@ -6,12 +6,20 @@ import Menu from "../components/Menu";
 import { useRouter } from "next/navigation";
 import { UserApi } from "./new/components/utils";
 import LoadingCard from "../components/LoadingCard";
+
+type User = {
+  user: string;
+  name: string;
+  permissions: Array<string>;
+  id: string
+}
+
 export default function Home() {
   const router = useRouter();
   const userApi = new UserApi("users");
   const [loading, setLoading] = useState<boolean>(false);
-  const [users, setUsers] = useState<Array<any>>([]);
-  const [selectedUser, setSelectedUser] = useState(null);
+  const [users, setUsers] = useState<Array<User>>([]);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
   useEffect(() => {
     const loadUsers = async () => {
       try {
@@ -27,7 +35,7 @@ export default function Home() {
     loadUsers();
   }, []);
 
-  const showOptionsModal = async (item) => { 
+  const showOptionsModal = async (item: User) => { 
     setSelectedUser(item);
     const modalData = document.getElementById('default-modal');
     const modal = new Modal(modalData);
