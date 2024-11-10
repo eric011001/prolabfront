@@ -1,5 +1,4 @@
 "use client";
-import "flowbite";
 import React, { useEffect, useState, useRef } from "react";
 import Menu from "../components/Menu";
 import ConfirmModal from "../components/ConfirmModal";
@@ -54,6 +53,7 @@ export default function Home() {
   const [selectedDoc, setSelectedDoc] = useState<Doc | null>(null);
   const [savingDoc, setSavingDoc] = useState<boolean>(false);
   const [deletedDoc, setDeletedDoc] = useState<NodeId | null>(null);
+  const [showDeleteModalView, setShowDeleteModalView] = useState(false);
   const [treeInfo, setTreeInfo] = useState< INode<IFlatMetadata>[] | null>(
     flattenTree({
       name: "",
@@ -137,6 +137,7 @@ export default function Home() {
 
   const showDeleteModal = (id: NodeId) => {
     setDeletedDoc(id);
+    setShowDeleteModalView(true);
     if(modalRef.current) {
       modalRef.current.showModal();
     }
@@ -388,7 +389,8 @@ export default function Home() {
           </div>
           <ConfirmModal
             title="¿Seguro que deseas eliminar este registro?"
-            ref={modalRef}
+            modalShow={showDeleteModalView}
+            setModalShow={setShowDeleteModalView}
             id={"deleteModal"}
             confirmButton={"Si, seguro"}
             dimissButton={"Cancelar"}

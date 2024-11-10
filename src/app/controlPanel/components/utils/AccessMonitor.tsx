@@ -1,11 +1,9 @@
-import { useRouter } from "next/navigation";
 export class UseAccessMonitor {
     permissions;
-    router = useRouter();
     constructor() {
         const actualPermissions = localStorage.getItem('permissions');
         if(!actualPermissions) {
-            this.router.push('/controlPanel/login')
+            throw new Error('Permissions not found')
         }
         this.permissions = JSON.parse(actualPermissions ?? '{}');
     }

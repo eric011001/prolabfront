@@ -1,5 +1,4 @@
 "use client";
-import "flowbite";
 import React, { PropsWithChildren, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { UseAccessMonitor } from "./utils/AccessMonitor";
@@ -12,11 +11,20 @@ type UserState = {
 
 const Menu = (props: PropsWithChildren) => {
   const [user, setUser] = useState<UserState | null>(null);
-  const accessMonitor = new UseAccessMonitor();
+  const [accessMonitor, setAccessMonitor] = useState<UseAccessMonitor | null>(
+    null
+  );
   useEffect(() => {
-    const sessionUser = localStorage.getItem("user");
-    if (sessionUser) {
-      setUser(JSON.parse(sessionUser));
+    try {
+      import("flowbite").then(({ initFlowbite }) => initFlowbite());
+      const sessionUser = localStorage.getItem("user");
+      if (sessionUser) {
+        setUser(JSON.parse(sessionUser));
+      }
+      setAccessMonitor(new UseAccessMonitor());
+    } catch (error) {
+      console.log(error);
+      router.push("/controlPanel/login");
     }
   }, []);
 
@@ -26,6 +34,11 @@ const Menu = (props: PropsWithChildren) => {
     localStorage.clear();
     router.push("/controlPanel/login");
   };
+
+  if (!accessMonitor) {
+    return "Cargando...";
+  }
+
   return (
     <>
       <nav className="fixed top-0 z-50 w-full bg-white border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700">

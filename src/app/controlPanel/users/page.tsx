@@ -1,7 +1,6 @@
 "use client";
-import "flowbite";
-import { Modal } from "flowbite";
-import React, { useEffect, useState, useRef } from "react";
+import { Modal, Button } from "flowbite-react";
+import React, { useEffect, useState } from "react";
 import Menu from "../components/Menu";
 import { useRouter } from "next/navigation";
 import { UserApi } from "./new/components/utils";
@@ -17,10 +16,12 @@ type User = {
 export default function Home() {
   const router = useRouter();
   const userApi = new UserApi("users");
-  const modalRef = useRef<HTMLDivElement | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [users, setUsers] = useState<Array<User>>([]);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [modalOptionsView, setModalOptionsView] = useState<boolean>(false);
+  const [loadingAction, setLoadingAction] = useState(false);
+
   useEffect(() => {
     const loadUsers = async () => {
       try {
@@ -38,17 +39,12 @@ export default function Home() {
 
   const showOptionsModal = async (item: User) => {
     setSelectedUser(item);
-    if (typeof window !== "undefined") {
-      const modal = new Modal(modalRef.current);
-      modal.show();
-    }
+    setModalOptionsView(true);
   };
 
   const hideOptionsModal = () => {
-    if (typeof window !== "undefined") {
-      const modal = new Modal(modalRef.current);
-      modal.hide();
-    }
+    setSelectedUser(null);
+    setModalOptionsView(false);
   };
 
   const deleteUser = async () => {
@@ -56,6 +52,7 @@ export default function Home() {
       return;
     }
     try {
+      setLoadingAction(true);
       await userApi.deleteUser(selectedUser.id);
       setLoading(true);
       const usersData = await userApi.listUsers();
@@ -65,6 +62,7 @@ export default function Home() {
     } finally {
       hideOptionsModal();
       setLoading(false);
+      setLoadingAction(true);
     }
   };
 
@@ -77,6 +75,7 @@ export default function Home() {
           </h5>
           <p className="font-normal text-gray-700 dark:text-gray-400">
             Módulo de administración de usuarios y permisos
+            {modalOptionsView ? "true" : "false"}
           </p>
         </div>
         <div className="lg:flex justify-between px-5 mb-5">
@@ -253,76 +252,51 @@ export default function Home() {
             </ul>
           </nav>
         </div>
-        <div
-          id="default-modal"
-          ref={modalRef}
-          tabIndex={-1}
-          aria-hidden="true"
-          className="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full"
+        <Modal
+          show={modalOptionsView}
+          size={'5xl'}
+          onClose={() => setModalOptionsView(false)}
         >
-          <div className="relative p-4 w-full max-w-2xl max-h-full">
-            <div className="relative bg-white rounded-lg shadow dark:bg-gray-700">
-              <div className="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-                  Opciones
-                </h3>
-                <button
-                  type="button"
-                  className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
-                  onClick={() => hideOptionsModal()}
-                >
-                  <svg
-                    className="w-3 h-3"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 14 14"
-                  >
-                    <path
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
-                    />
-                  </svg>
-                  <span className="sr-only">Cerrar ventana</span>
-                </button>
-              </div>
-              <div className="p-4 md:p-5 space-y-4">
-                <div className="block cursor-pointer max-w-full p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
-                  <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
-                    Editar
-                  </h5>
-                  <p className="font-normal text-gray-700 dark:text-gray-400">
-                    Modifica la información editable de este usuario como
-                    nombre, usuario y permisos
-                  </p>
-                </div>
-                <div
-                  className="block cursor-pointer max-w-full p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700"
-                  onClick={() => deleteUser()}
-                >
-                  <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
-                    Eliminar
-                  </h5>
-                  <p className="font-normal text-gray-700 dark:text-gray-400">
-                    Elimina un usuario, todas sus contribuciones quedarán bajo
-                    su nombre
-                  </p>
-                </div>
-                <div className="block cursor-pointer max-w-full p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
-                  <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
-                    Restablecer contraseña
-                  </h5>
-                  <p className="font-normal text-gray-700 dark:text-gray-400">
-                    Ayuda a este usuario a restablecer su contraseña
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+          <Modal.Header>Opciones</Modal.Header>
+          <Modal.Body>
+            <Modal.Body>
+                  <div className="p-4 md:p-5 space-y-4">
+                    <div className="block cursor-pointer max-w-full p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
+                      <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+                        Editar
+                      </h5>
+                      <p className="font-normal text-gray-700 dark:text-gray-400">
+                        Modifica la información editable de este usuario como
+                        nombre, usuario y permisos
+                      </p>
+                    </div>
+                    <div
+                      className="block cursor-pointer max-w-full p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700"
+                      onClick={() => deleteUser()}
+                    >
+                      <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+                        Eliminar
+                      </h5>
+                      <p className="font-normal text-gray-700 dark:text-gray-400">
+                        Elimina un usuario, todas sus contribuciones quedarán
+                        bajo su nombre
+                      </p>
+                    </div>
+                    <div className="block cursor-pointer max-w-full p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
+                      <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+                        Restablecer contraseña
+                      </h5>
+                      <p className="font-normal text-gray-700 dark:text-gray-400">
+                        Ayuda a este usuario a restablecer su contraseña
+                      </p>
+                    </div>
+                  </div>
+            </Modal.Body>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button disabled={loadingAction} onClick={() => setModalOptionsView(false)}>Aceptar</Button>
+          </Modal.Footer>
+        </Modal>
       </div>
     </Menu>
   );

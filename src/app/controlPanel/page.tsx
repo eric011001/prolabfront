@@ -1,5 +1,4 @@
 "use client";
-import "flowbite";
 import React from "react";
 import Menu from "./components/Menu";
 export default function Home() {
