@@ -371,7 +371,7 @@ export default function Home() {
                     markdownShortcutPlugin(),
                   ]}
                 />
-                <div className="flex justify-between">
+                <div className="lg:flex justify-between">
                   <div>
                     Creado por: {selectedDoc.writtenBy}
                   </div>
