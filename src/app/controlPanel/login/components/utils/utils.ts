@@ -1,5 +1,6 @@
 import axios from "axios";
 import { LoginForm, ChangePasswordForm } from './types';
+
 export class LoginApi {
     server;
     nameSpace;
@@ -9,12 +10,18 @@ export class LoginApi {
         this.nameSpace = nameSpace;
     }
 
+
     get url() {
         return `${this.server}${this.nameSpace}`
     }
 
     async login(params: LoginForm) {
-        return await axios.post(`${this.url}/login`, params).then(({data}) => data.object);
+        const result = await axios.post(`${this.url}/login`, params);
+        if(!result.data.object) {
+            throw (result.data.message)
+        }
+        return result.data.object;
+        
     }
 
     async resetPassword(id: string, params: ChangePasswordForm) {

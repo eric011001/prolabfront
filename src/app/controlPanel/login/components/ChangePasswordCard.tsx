@@ -1,13 +1,21 @@
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
+import { Button, Spinner } from "flowbite-react";
 import { ChangePasswordForm } from './utils/types'
-
+import type { CustomFlowbiteTheme } from "flowbite-react";
 interface Params {
   changePassword: (params: ChangePasswordForm) => void;
   isChangePassword: boolean;
+  disabledLoginButton?: boolean;
 }
 
-const ChangePasswordCard = ({ changePassword, isChangePassword }: Params) => {
+const customTheme: CustomFlowbiteTheme["button"] = {
+  color: {
+    primaryYellow: "bg-primary-600 hover:bg-primary-700",
+  },
+};
+
+const ChangePasswordCard = ({ changePassword, isChangePassword, disabledLoginButton }: Params) => {
   const verifyTokenErrorPassword = "Tu contraseña previa es necesaria";
   const verifyTokenErrorToken = "Tu token de acceso es necesario";
   const changePasswordSchema = Yup.object().shape({
@@ -117,12 +125,19 @@ const ChangePasswordCard = ({ changePassword, isChangePassword }: Params) => {
                   value={props.values.confirmPassword}
                 />
               </div>
-              <button
+              <Button
+                disabled={disabledLoginButton}
                 type="submit"
-                className="w-full text-white bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
+                className="w-full text-white bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
+                theme={customTheme}
+                color="primaryYellow"
               >
-                Acceder
-              </button>
+                {!disabledLoginButton ? (
+                  "Guardar cambios"
+                ) : (
+                  <Spinner color="warning" aria-label="Cargando..." />
+                )}
+              </Button>
             </Form>
           )}
         </Formik>

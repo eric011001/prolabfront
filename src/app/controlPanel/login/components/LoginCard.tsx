@@ -1,11 +1,20 @@
 import { Formik, Form } from "formik";
+import { Button, Spinner } from "flowbite-react";
+import type { CustomFlowbiteTheme } from "flowbite-react";
 import * as Yup from "yup";
-import { LoginForm } from './utils/types';
+import { LoginForm } from "./utils/types";
 interface Params {
-    loginFunction: (params: LoginForm) => Promise<void>;
+  loginFunction: (params: LoginForm) => Promise<void>;
+  disabledLoginButton?: boolean;
 }
 
-const LoginCard = ({ loginFunction }: Params) => {
+const customTheme: CustomFlowbiteTheme["button"] = {
+  color: {
+    primaryYellow: "bg-primary-600 hover:bg-primary-700",
+  },
+};
+
+const LoginCard = ({ loginFunction, disabledLoginButton }: Params) => {
   const loginSchema = Yup.object().shape({
     email: Yup.string()
       .email("Se espera un email valido")
@@ -78,12 +87,19 @@ const LoginCard = ({ loginFunction }: Params) => {
                   Olvidaste tu contraseña
                 </a>
               </div>
-              <button
+              <Button
+                disabled={disabledLoginButton}
                 type="submit"
-                className="w-full text-white bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
+                className="w-full text-white bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
+                theme={customTheme}
+                color="primaryYellow"
               >
-                Acceder
-              </button>
+                {!disabledLoginButton ? (
+                  "Acceder"
+                ) : (
+                  <Spinner color="warning" aria-label="Cargando..." />
+                )}
+              </Button>
             </Form>
           )}
         </Formik>

@@ -15,8 +15,8 @@ const Menu = (props: PropsWithChildren) => {
     null
   );
   useEffect(() => {
+    import("flowbite").then(({ initFlowbite }) => initFlowbite());
     try {
-      import("flowbite").then(({ initFlowbite }) => initFlowbite());
       const sessionUser = localStorage.getItem("user");
       if (sessionUser) {
         setUser(JSON.parse(sessionUser));
