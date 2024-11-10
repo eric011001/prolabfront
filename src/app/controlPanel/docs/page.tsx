@@ -146,8 +146,8 @@ export default function Home() {
   return (
     <Menu>
       <div className="p-4 border-gray-200 rounded-lg dark:border-gray-700 mt-14 border-2 border h-screen overflow-y-auto">
-        <div className="flex">
-          <div className="w-1/3 h-full">
+        <div className="lg:flex">
+          <div className="lg:w-1/3 h-full">
             <div className="">
               <h3 className="text-center font-bold text-xl mb-3">
                 Documentación
@@ -269,7 +269,7 @@ export default function Home() {
               />
             )}
           </div>
-          <div className="w-2/3 h-screen">
+          <div className="lg:w-2/3 h-screen">
             {!selectedDoc || loadingDoc ? (
               <div className="h-screen flex w-full py-6 justify-center">
                 <div className="text-center w-full">
