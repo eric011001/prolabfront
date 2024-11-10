@@ -8,8 +8,13 @@ import LoginCard from "./components/LoginCard";
 import { ChangePasswordForm, LoginForm } from './components/utils/types.js';
 import ChangePasswordCard from "./components/ChangePasswordCard";
 
+type User = {
+    name: string;
+    id: string;
+}
+
 export default function Home() {
-    const [loggedUser, setLoggedUser] = useState(null);
+    const [loggedUser, setLoggedUser] = useState<User | null>(null);
     const api = new LoginApi('users');
     useEffect(() => {
         if(localStorage.getItem('token')) {
@@ -32,8 +37,11 @@ export default function Home() {
 
     const changePassword = async (values: ChangePasswordForm) => {
         try {
-            await api.resetPassword(loggedUser.id, values);
-            setLoggedUser(null);
+            if(loggedUser) {
+                await api.resetPassword(loggedUser?.id, values);
+                setLoggedUser(null);
+            }
+            throw Error('No disponible')
         } catch (error) {
             console.log(error);
         } finally {

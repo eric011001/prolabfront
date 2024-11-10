@@ -1,4 +1,4 @@
-import React, { forwardRef, useImperativeHandle } from "react";
+import React, { forwardRef, useImperativeHandle, useRef } from "react";
 import { Modal } from "flowbite";
 
 interface ConfirmModalParams {
@@ -32,15 +32,18 @@ const ConfirmModal = forwardRef(
         hideModal
       };
     });
+    const modalRef = useRef<HTMLDivElement | null>(null);
     const showModal = () => {
-        const modalData = document.getElementById(id);
-        const modal = new Modal(modalData);
+      if (typeof window !== 'undefined') {
+        const modal = new Modal(modalRef.current);
         modal.show();
+      }
     };
     const hideModal = () => {
-        const modalData = document.getElementById(id);
-        const modal = new Modal(modalData);
+      if (typeof window !== 'undefined') {
+        const modal = new Modal(modalRef.current);
         modal.hide();
+      }
     };
     const onPrimaryClick = async () => {
       if(confirmButtonAction) {
@@ -58,6 +61,7 @@ const ConfirmModal = forwardRef(
     return (
       <div
         id={id}
+        ref={modalRef}
         tabIndex={-1}
         className="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full"
       >

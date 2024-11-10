@@ -1,5 +1,5 @@
-import React, {useEffect} from "react";
-import { Modal } from 'flowbite';
+import React, { useEffect, useRef } from "react";
+import { Modal } from "flowbite";
 interface DefaultModalParams {
   id: string;
   title: string;
@@ -27,31 +27,35 @@ const DefaultModal = ({
   secondaryButtonAction,
   setModal,
 }: DefaultModalParams) => {
-
+  const modalRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
-    const modalData = document.getElementById('static-modal');
-    const modal = new Modal(modalData);
-    if(setModal){
-      setModal(modal);
+    if (typeof window !== "undefined") {
+      const modal = new Modal(modalRef.current);
+      if (setModal) {
+        setModal(modal);
+      }
     }
   }, []);
 
-  const primaryAction =  () => {
-    if(primaryButtonAction) {
+  
+
+  const primaryAction = () => {
+    if (primaryButtonAction) {
       primaryButtonAction();
     }
-  }
+  };
 
   const secondaryAction = () => {
     if (secondaryButtonAction) {
       secondaryButtonAction();
     }
-  }
+  };
 
   return (
     <div
       id={id}
       tabIndex={-1}
+      ref={modalRef}
       aria-hidden="true"
       className="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full"
     >
@@ -97,16 +101,16 @@ const DefaultModal = ({
                   {primaryButtonText}
                 </button>
               ) : null}
-              {
-                secondaryButton ? (<button
-                    data-modal-hide={id}
-                    onClick={() => secondaryAction()}
-                    type="button"
-                    className="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700"
-                  >
-                    {secondaryButtonText}
-                  </button>) : null
-              }
+              {secondaryButton ? (
+                <button
+                  data-modal-hide={id}
+                  onClick={() => secondaryAction()}
+                  type="button"
+                  className="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700"
+                >
+                  {secondaryButtonText}
+                </button>
+              ) : null}
             </div>
           ) : null}
         </div>

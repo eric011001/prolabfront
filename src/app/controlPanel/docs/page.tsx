@@ -24,16 +24,11 @@ import {
   diffSourcePlugin,
 } from "@mdxeditor/editor";
 
-import TreeView, { flattenTree, NodeId } from "react-accessible-treeview";
+import TreeView, { flattenTree, NodeId, INode } from "react-accessible-treeview";
 
 import { DocsApi } from "./components/utils";
 import Arrow from "./components/Arrow";
-
-type Node = {
-  id: NodeId;
-  name: string;
-  title: string;
-};
+import { IFlatMetadata } from "react-accessible-treeview/dist/TreeView/utils";
 
 type Doc = {
   id: string | NodeId;
@@ -42,17 +37,24 @@ type Doc = {
   parent: string;
   isRoot: boolean;
   writtenBy: string;
+  name: string;
 };
 
+type ModalActions = {
+  showModal: () => void;
+  hideModal: () => void;
+}
+
+
 export default function Home() {
-  const modalRef = useRef();
+  const modalRef = useRef<ModalActions | undefined>(null);
   const docsApi = new DocsApi("docs");
   const [loading, setLoading] = useState<boolean>(false);
   const [loadingDoc, setLoadingDoc] = useState<boolean>(false);
-  const [selectedDoc, setSelectedDoc] = useState<Doc | Node | null>(null);
+  const [selectedDoc, setSelectedDoc] = useState<Doc | null>(null);
   const [savingDoc, setSavingDoc] = useState<boolean>(false);
   const [deletedDoc, setDeletedDoc] = useState<NodeId | null>(null);
-  const [treeInfo, setTreeInfo] = useState< unknown | null>(
+  const [treeInfo, setTreeInfo] = useState< INode<IFlatMetadata>[] | null>(
     flattenTree({
       name: "",
       children: [],
@@ -104,7 +106,7 @@ export default function Home() {
     await reloadData();
   };
 
-  const changeSelectedDoc = (data: Node) => {
+  const changeSelectedDoc = (data: Doc) => {
     setSelectedDoc(data);
   };
 
@@ -135,7 +137,9 @@ export default function Home() {
 
   const showDeleteModal = (id: NodeId) => {
     setDeletedDoc(id);
-    modalRef.current.showModal();
+    if(modalRef.current) {
+      modalRef.current.showModal();
+    }
   };
 
   return (

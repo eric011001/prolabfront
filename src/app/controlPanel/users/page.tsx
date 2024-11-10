@@ -1,7 +1,7 @@
 "use client";
 import "flowbite";
-import { Modal } from 'flowbite';
-import React, { useEffect, useState } from "react";
+import { Modal } from "flowbite";
+import React, { useEffect, useState, useRef } from "react";
 import Menu from "../components/Menu";
 import { useRouter } from "next/navigation";
 import { UserApi } from "./new/components/utils";
@@ -11,12 +11,13 @@ type User = {
   user: string;
   name: string;
   permissions: Array<string>;
-  id: string
-}
+  id: string;
+};
 
 export default function Home() {
   const router = useRouter();
   const userApi = new UserApi("users");
+  const modalRef = useRef<HTMLDivElement | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [users, setUsers] = useState<Array<User>>([]);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
@@ -35,21 +36,23 @@ export default function Home() {
     loadUsers();
   }, []);
 
-  const showOptionsModal = async (item: User) => { 
+  const showOptionsModal = async (item: User) => {
     setSelectedUser(item);
-    const modalData = document.getElementById('default-modal');
-    const modal = new Modal(modalData);
-    modal.show();
-  }
+    if (typeof window !== "undefined") {
+      const modal = new Modal(modalRef.current);
+      modal.show();
+    }
+  };
 
   const hideOptionsModal = () => {
-    const modalData = document.getElementById('default-modal');
-    const modal = new Modal(modalData);
-    modal.hide();
-  }
+    if (typeof window !== "undefined") {
+      const modal = new Modal(modalRef.current);
+      modal.hide();
+    }
+  };
 
   const deleteUser = async () => {
-    if(!selectedUser) {
+    if (!selectedUser) {
       return;
     }
     try {
@@ -63,7 +66,7 @@ export default function Home() {
       hideOptionsModal();
       setLoading(false);
     }
-  }
+  };
 
   return (
     <Menu>
@@ -133,54 +136,57 @@ export default function Home() {
                 </tr>
               </thead>
               <tbody>
-                {
-                  users.map((itemUser) => (
-                    <tr key={itemUser.user} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                  <th
-                    scope="row"
-                    className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                {users.map((itemUser) => (
+                  <tr
+                    key={itemUser.user}
+                    className="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
                   >
-                    {itemUser.name}
-                  </th>
-                  <td className="px-6 py-4">{itemUser.user}</td>
-                  <td className="px-6 py-4 ">{itemUser.permissions.length}</td>
-                  <td className="px-6 py-4">
-                    <button
-                      onClick={() => showOptionsModal(itemUser)}
-                      type="button"
-                      className="text-white hover:bg-gray-200  focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                    <th
+                      scope="row"
+                      className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
                     >
-                      <svg
-                        className="w-6 h-6 text-gray-800 dark:text-white"
-                        aria-hidden="true"
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="24"
-                        height="24"
-                        fill="none"
-                        viewBox="0 0 24 24"
+                      {itemUser.name}
+                    </th>
+                    <td className="px-6 py-4">{itemUser.user}</td>
+                    <td className="px-6 py-4 ">
+                      {itemUser.permissions.length}
+                    </td>
+                    <td className="px-6 py-4">
+                      <button
+                        onClick={() => showOptionsModal(itemUser)}
+                        type="button"
+                        className="text-white hover:bg-gray-200  focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
                       >
-                        <path
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          d="M21 12c0 1.2-4.03 6-9 6s-9-4.8-9-6c0-1.2 4.03-6 9-6s9 4.8 9 6Z"
-                        />
-                        <path
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
-                        />
-                      </svg>
+                        <svg
+                          className="w-6 h-6 text-gray-800 dark:text-white"
+                          aria-hidden="true"
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="24"
+                          height="24"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            d="M21 12c0 1.2-4.03 6-9 6s-9-4.8-9-6c0-1.2 4.03-6 9-6s9 4.8 9 6Z"
+                          />
+                          <path
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+                          />
+                        </svg>
 
-                      <span className="sr-only">Icon description</span>
-                    </button>
-                  </td>
-                </tr>
-                  ))
-                }
+                        <span className="sr-only">Icon description</span>
+                      </button>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           ) : (
-            <LoadingCard  title="Cargando..." subtitle="Cargando usuarios" />
+            <LoadingCard title="Cargando..." subtitle="Cargando usuarios" />
           )}
         </div>
         <div className="lg:flex justify-between px-5 mt-5">
@@ -249,6 +255,7 @@ export default function Home() {
         </div>
         <div
           id="default-modal"
+          ref={modalRef}
           tabIndex={-1}
           aria-hidden="true"
           className="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full"
@@ -292,7 +299,10 @@ export default function Home() {
                     nombre, usuario y permisos
                   </p>
                 </div>
-                <div className="block cursor-pointer max-w-full p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700" onClick={() => deleteUser()}>
+                <div
+                  className="block cursor-pointer max-w-full p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700"
+                  onClick={() => deleteUser()}
+                >
                   <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
                     Eliminar
                   </h5>
