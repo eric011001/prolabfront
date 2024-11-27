@@ -22,12 +22,24 @@ import {
   directivesPlugin,
   diffSourcePlugin,
 } from "@mdxeditor/editor";
+import { Spinner } from "flowbite-react";
 
-import TreeView, { flattenTree, NodeId, INode } from "react-accessible-treeview";
+import TreeView, {
+  flattenTree,
+  NodeId,
+  INode,
+} from "react-accessible-treeview";
 
 import { DocsApi } from "./components/utils";
 import Arrow from "./components/Arrow";
 import { IFlatMetadata } from "react-accessible-treeview/dist/TreeView/utils";
+import TextInput from "../components/TextInput";
+import dayjs from "dayjs";
+
+type EditedBy = {
+  person: string;
+  date: string;
+};
 
 type Doc = {
   id: string | NodeId;
@@ -37,13 +49,13 @@ type Doc = {
   isRoot: boolean;
   writtenBy: string;
   name: string;
+  editedBy: Array<EditedBy>;
 };
 
 type ModalActions = {
   showModal: () => void;
   hideModal: () => void;
-}
-
+};
 
 export default function Home() {
   const modalRef = useRef<ModalActions | undefined>(null);
@@ -54,7 +66,7 @@ export default function Home() {
   const [savingDoc, setSavingDoc] = useState<boolean>(false);
   const [deletedDoc, setDeletedDoc] = useState<NodeId | null>(null);
   const [showDeleteModalView, setShowDeleteModalView] = useState(false);
-  const [treeInfo, setTreeInfo] = useState< INode<IFlatMetadata>[] | null>(
+  const [treeInfo, setTreeInfo] = useState<INode<IFlatMetadata>[] | null>(
     flattenTree({
       name: "",
       children: [],
@@ -95,6 +107,18 @@ export default function Home() {
     }
   };
 
+  const getLastDateFromArray = (arr: { date: Date | string }[]) => {
+    if (!arr || arr.length === 0) {
+      return null;
+    }
+    const formattedObject = arr.map((i) => ({ ...i, date: new Date(i.date) }));
+    const cosa = formattedObject.reduce(
+      (prev, curr) => (curr.date > prev.date ? curr : prev),
+      formattedObject[0]
+    );
+    return dayjs(cosa?.date).format("DD/MM/YYYY HH:mm:ss") ?? "indefinido";
+  };
+
   const deleteNode = async () => {
     await docsApi.deleteNode(deletedDoc ?? "");
     setSelectedDoc(null);
@@ -113,7 +137,8 @@ export default function Home() {
   const editData = async (id: NodeId) => {
     try {
       setSavingDoc(true);
-      await docsApi.editNode(id, selectedDoc);
+      const result = await docsApi.editNode(id, selectedDoc);
+      setSelectedDoc(result);
       await reloadData();
     } catch (error) {
       console.log(error);
@@ -126,7 +151,6 @@ export default function Home() {
     try {
       setLoadingDoc(true);
       const result = await docsApi.getNode(id);
-      console.log(result);
       setSelectedDoc(result);
     } catch (error) {
       console.log(error);
@@ -138,7 +162,7 @@ export default function Home() {
   const showDeleteModal = (id: NodeId) => {
     setDeletedDoc(id);
     setShowDeleteModalView(true);
-    if(modalRef.current) {
+    if (modalRef.current) {
       modalRef.current.showModal();
     }
   };
@@ -293,40 +317,58 @@ export default function Home() {
                   </div>
 
                   <h3 className="font-bold text-2xl">Documento</h3>
-                  {
-                    loadingDoc ?
-                    (
-                      <p>Descargando documento, espere por favor</p>
-                    ) :
-                    (
-                      <p>Selecciona un documento para comenzar a editar</p>
-                    )
-                  }
+                  {loadingDoc ? (
+                    <p>Descargando documento, espere por favor</p>
+                  ) : (
+                    <p>Selecciona un documento para comenzar a editar</p>
+                  )}
                 </div>
               </div>
             ) : (
               <>
-                <div className="mb-3">
-                  <label
-                    htmlFor="title"
-                    className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                <div className="flex">
+                  <div className="mb-3 xl:w-2/3">
+                    <TextInput
+                      value={selectedDoc.title ?? ""}
+                      onChange={({ target: { value } }) =>
+                        changeSelectedDoc({
+                          ...selectedDoc,
+                          title: value,
+                          name: "",
+                        })
+                      }
+                      placeholder="Titulo"
+                      required
+                      id="disabled-input"
+                      type="text"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    disabled={savingDoc}
+                    className="focus:outline-none xl:w-1/3 ml-2 text-white font-bold text-lg bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-yellow-300 rounded-lg text-sm px-3 py-2 me-2 mb-2 dark:focus:ring-yellow-900"
+                    onClick={() => editData(selectedDoc.id)}
                   >
-                    Titulo
-                  </label>
-                  <input
-                    type="text"
-                    id="title"
-                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                    placeholder="Titulo"
-                    required
-                    value={selectedDoc.title ?? ""}
-                    onChange={({ target: { value } }) =>
-                      changeSelectedDoc({
-                        ...selectedDoc, title: value,
-                        name: ""
-                      })
-                    }
-                  />
+                    {savingDoc ? (
+                      <>
+                        <Spinner
+                          color="warning"
+                          aria-label="Spinner button example"
+                          size="sm"
+                        />
+                        <span className="pl-3">Guardando...</span>
+                      </>
+                    ) : (
+                      "Guardar cambios"
+                    )}
+                  </button>
+                </div>
+                <div className="mb-2 flex justify-end">
+                  <div className="">
+                    <span className="inline-block text-sm text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 rounded-full px-3 py-1">
+                      Última actualización: {getLastDateFromArray(selectedDoc.editedBy)}
+                    </span>
+                  </div>
                 </div>
                 <MDXEditor
                   markdown={selectedDoc.content}
@@ -371,20 +413,6 @@ export default function Home() {
                     markdownShortcutPlugin(),
                   ]}
                 />
-                <div className="lg:flex justify-between">
-                  <div>
-                    Creado por: {selectedDoc.writtenBy}
-                  </div>
-                  <button
-                    type="button"
-                    disabled={savingDoc}
-                    className="focus:outline-none text-white font-bold text-lg bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-yellow-300 rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:focus:ring-yellow-900"
-                    onClick={() => editData(selectedDoc.id)}
-                  >
-                    {savingDoc ? ( 'guardando') : ('Guardar cambios')}
-                    
-                  </button>
-                </div>
               </>
             )}
           </div>
