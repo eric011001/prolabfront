@@ -40,8 +40,6 @@ import { CgEye } from "react-icons/cg";
 import { TbEyeClosed } from "react-icons/tb";
 import { FaRegCalendarAlt, FaClock, FaUserAlt } from "react-icons/fa";
 
-import { MDXRemoteSerializeResult } from "next-mdx-remote";
-import { serialize } from "next-mdx-remote/serialize";
 import UnderConstruction from "../components/UnderConstruction";
 
 type EditedBy = {
@@ -76,10 +74,7 @@ export default function Home() {
   const [deletedDoc, setDeletedDoc] = useState<NodeId | null>(null);
   const [showDeleteModalView, setShowDeleteModalView] = useState(false);
   const [showDetails, setShowDetails] = useState<boolean>(false);
-  const [serializedMDX, setSerializedMDX] =
-    useState<
-      MDXRemoteSerializeResult<Record<string, unknown>, Record<string, unknown>>
-    >(null);
+
   const [treeInfo, setTreeInfo] = useState<INode<IFlatMetadata>[] | null>(
     flattenTree({
       name: "",
@@ -171,7 +166,6 @@ export default function Home() {
       setLoadingDoc(true);
       const result = await docsApi.getNode(id);
       setSelectedDoc(result);
-      setSerializedMDX(await serialize(result.content));
     } catch (error) {
       console.log(error);
     } finally {
