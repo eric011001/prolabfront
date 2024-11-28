@@ -22,7 +22,7 @@ import {
   directivesPlugin,
   diffSourcePlugin,
 } from "@mdxeditor/editor";
-import { Spinner } from "flowbite-react";
+import { Spinner, Toast, Button, Modal, Card } from "flowbite-react";
 
 import TreeView, {
   flattenTree,
@@ -35,6 +35,14 @@ import Arrow from "./components/Arrow";
 import { IFlatMetadata } from "react-accessible-treeview/dist/TreeView/utils";
 import TextInput from "../components/TextInput";
 import dayjs from "dayjs";
+import { HiX } from "react-icons/hi";
+import { CgEye } from "react-icons/cg";
+import { TbEyeClosed } from "react-icons/tb";
+import { FaRegCalendarAlt, FaClock, FaUserAlt } from "react-icons/fa";
+
+import { MDXRemoteSerializeResult } from "next-mdx-remote";
+import { serialize } from "next-mdx-remote/serialize";
+import UnderConstruction from "../components/UnderConstruction";
 
 type EditedBy = {
   person: string;
@@ -64,8 +72,14 @@ export default function Home() {
   const [loadingDoc, setLoadingDoc] = useState<boolean>(false);
   const [selectedDoc, setSelectedDoc] = useState<Doc | null>(null);
   const [savingDoc, setSavingDoc] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
   const [deletedDoc, setDeletedDoc] = useState<NodeId | null>(null);
   const [showDeleteModalView, setShowDeleteModalView] = useState(false);
+  const [showDetails, setShowDetails] = useState<boolean>(false);
+  const [serializedMDX, setSerializedMDX] =
+    useState<
+      MDXRemoteSerializeResult<Record<string, unknown>, Record<string, unknown>>
+    >(null);
   const [treeInfo, setTreeInfo] = useState<INode<IFlatMetadata>[] | null>(
     flattenTree({
       name: "",
@@ -107,7 +121,9 @@ export default function Home() {
     }
   };
 
-  const getLastDateFromArray = (arr: { date: Date | string }[]) => {
+  const getLastDateFromArray = (
+    arr: { date: Date | string }[] | null | undefined
+  ) => {
     if (!arr || arr.length === 0) {
       return null;
     }
@@ -142,6 +158,9 @@ export default function Home() {
       await reloadData();
     } catch (error) {
       console.log(error);
+      if (typeof error === "string") {
+        setError(error);
+      }
     } finally {
       setSavingDoc(false);
     }
@@ -152,6 +171,7 @@ export default function Home() {
       setLoadingDoc(true);
       const result = await docsApi.getNode(id);
       setSelectedDoc(result);
+      setSerializedMDX(await serialize(result.content));
     } catch (error) {
       console.log(error);
     } finally {
@@ -326,7 +346,7 @@ export default function Home() {
               </div>
             ) : (
               <>
-                <div className="flex">
+                <div className="xl:flex">
                   <div className="mb-3 xl:w-2/3">
                     <TextInput
                       value={selectedDoc.title ?? ""}
@@ -343,30 +363,46 @@ export default function Home() {
                       type="text"
                     />
                   </div>
-                  <button
-                    type="button"
-                    disabled={savingDoc}
-                    className="focus:outline-none xl:w-1/3 ml-2 text-white font-bold text-lg bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-yellow-300 rounded-lg text-sm px-3 py-2 me-2 mb-2 dark:focus:ring-yellow-900"
-                    onClick={() => editData(selectedDoc.id)}
-                  >
-                    {savingDoc ? (
-                      <>
+                  <div className="xl:w-1/3 xl:ml-3 flex">
+                    <Button
+                      color="warning"
+                      disabled={savingDoc}
+                      onClick={() => editData(selectedDoc.id)}
+                      isProcessing={savingDoc}
+                      processingSpinner={
                         <Spinner
                           color="warning"
                           aria-label="Spinner button example"
                           size="sm"
                         />
-                        <span className="pl-3">Guardando...</span>
-                      </>
-                    ) : (
-                      "Guardar cambios"
-                    )}
-                  </button>
+                      }
+                      className="mb-2 w-2/3"
+                    >
+                      {savingDoc ? (
+                        <span className="pl-3 font-bold">Guardando...</span>
+                      ) : (
+                        <span className="pl-3 font-bold">Guardar</span>
+                      )}
+                    </Button>
+                    <Button
+                      className="mb-2 w-1/3 ml-2"
+                      disabled={savingDoc}
+                      color="warning"
+                      onClick={() => setShowDetails(true)}
+                    >
+                      {savingDoc ? (
+                        <TbEyeClosed className="h-6 w-6" />
+                      ) : (
+                        <CgEye className="h-6 w-6" />
+                      )}
+                    </Button>
+                  </div>
                 </div>
                 <div className="mb-2 flex justify-end">
                   <div className="">
                     <span className="inline-block text-sm text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 rounded-full px-3 py-1">
-                      Última actualización: {getLastDateFromArray(selectedDoc.editedBy)}
+                      Última actualización:{" "}
+                      {getLastDateFromArray(selectedDoc.editedBy)}
                     </span>
                   </div>
                 </div>
@@ -428,6 +464,106 @@ export default function Home() {
             confirmButtonAction={() => deleteNode()}
           />
         </div>
+        <Modal
+          show={showDetails}
+          size={"7xl"}
+          onClose={() => setShowDetails(false)}
+        >
+          <Modal.Header>
+            <h1
+              className={`text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100`}
+            >
+              Detalles de {selectedDoc?.title}
+            </h1>
+          </Modal.Header>
+          <Modal.Body>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              <div className="p-4 rounded-lg border border-gray-200 dark:border-gray-800">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Escrito por:{" "}
+                  <span className="font-bold text-gray-900 dark:text-gray-100">
+                    {selectedDoc?.writtenBy}
+                  </span>
+                </p>
+              </div>
+              <div className="p-4 rounded-lg border border-gray-200 dark:border-gray-800">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Editado{" "}
+                  <span className="font-bold text-gray-900 dark:text-gray-100">
+                    {selectedDoc?.editedBy.length}
+                  </span>{" "}
+                  veces
+                </p>
+              </div>
+              <div className="p-4 rounded-lg border border-gray-200 dark:border-gray-800">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Última edicion:{" "}
+                  <span className="font-bold text-gray-900 dark:text-gray-100">
+                    {getLastDateFromArray(selectedDoc?.editedBy)}
+                  </span>
+                </p>
+              </div>
+            </div>
+            <div className="xl:flex">
+              <div className="xl:w-2/3">
+                <UnderConstruction
+                  title="Resto del componente en construcción"
+                  showHomeButton={false}
+                />
+              </div>
+              <div className="xl:w-1/3">
+                <Card className="max-w-md mt-3 ml-2.5">
+                  <h2 className="text-xl font-bold text-center mb-2 text-gray-800 dark:text-gray-100">
+                    Historial de cambios
+                  </h2>
+                  <div className="max-h-[400px] overflow-y-auto pr-2">
+                    <ul className="space-y-4">
+                      {selectedDoc?.editedBy.map((item, index) => {
+                        return (
+                          <li
+                            key={index}
+                            className="xl:flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                          >
+                            <div className="flex items-center space-x-3">
+                              <FaUserAlt className="h-5 w-5 text-gray-600" />
+                              <span className="font-medium">{item.person}</span>
+                            </div>
+                            <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400">
+                              <div className="flex items-center space-x-1">
+                                <FaRegCalendarAlt className="h-4 w-4" />
+                                <span>
+                                  {dayjs(item.date).format("DD/MM/YYYY")}
+                                </span>
+                              </div>
+                              <div className="flex items-center space-x-1">
+                                <FaClock className="h-4 w-4" />
+                                <span>
+                                  {dayjs(item.date).format("HH:mm:ss")}
+                                </span>
+                              </div>
+                            </div>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
+                </Card>
+              </div>
+            </div>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button color="warning" onClick={() => setShowDetails(false)}>Aceptar</Button>
+          </Modal.Footer>
+        </Modal>
+        {error && (
+          <Toast className="fixed top-16 right-5">
+            <div className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-red-100 text-red-500 dark:bg-red-800 dark:text-red-200">
+              <HiX className="h-5 w-5" />
+            </div>
+            <div className="ml-3 text-sm font-normal">{error}</div>
+            <Toast.Toggle />
+          </Toast>
+        )}
       </div>
     </Menu>
   );
