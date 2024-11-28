@@ -1,7 +1,7 @@
 'use client'
 
 import { FaHardHat, FaTools, FaHome } from 'react-icons/fa'
-import { Card, Button, Spinner } from 'flowbite-react'
+import { Card, Button } from 'flowbite-react'
 
 interface UnderConstructionProps {
   title?: string
