@@ -90,7 +90,7 @@ const TrueOrFalse = ({
       <h1 className="text-2xl font-bold mb-6 text-gray-800 dark:text-white">
         Verdadero o falso
       </h1>
-      {initialValues && (
+      {selecetedInitialValues && (
               <div className="flex items-center justify-between mb-5" key="opciones">
                 <div>
                   <h5 className="font-bold">Opciones: </h5>
