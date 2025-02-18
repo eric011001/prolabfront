@@ -17,7 +17,7 @@ export class DocsApi {
   nameSpace: string;
 
   constructor(nameSpace: string) {
-    this.server = `https://prolabback.onrender.com/`;
+    this.server = `${process.env.server_host}${process.env.server_port}/`
     this.nameSpace = nameSpace;
   }
 

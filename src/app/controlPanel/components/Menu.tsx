@@ -159,10 +159,10 @@ const Menu = (props: PropsWithChildren) => {
                 <span className="ms-3">Dashboard</span>
               </div>
             </li>
-            {accessMonitor.verifyPermissions("SESSIONS.READ") ? (
+            {true ? (
               <li>
-                <a
-                  href="#"
+                <div
+                  onClick={() => router.push("/controlPanel/sessions")}
                   className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
                 >
                   <svg
@@ -180,13 +180,13 @@ const Menu = (props: PropsWithChildren) => {
                   <span className="inline-flex items-center justify-center w-3 h-3 p-3 ms-3 text-sm font-medium text-yellow-800 bg-yellow-100 rounded-full dark:bg-yellow-900 dark:text-yellow-300">
                     3
                   </span>
-                </a>
+                </div>
               </li>
             ) : null}
-            {accessMonitor.verifyPermissions("ACTIVIIES.READ") ? (
+            {accessMonitor.verifyPermissions("ACTIVITIES.READ") ? (
               <li>
-                <a
-                  href="#"
+                <div
+                  onClick={() => router.push("/controlPanel/docs")}
                   className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
                 >
                   <svg
@@ -207,7 +207,7 @@ const Menu = (props: PropsWithChildren) => {
                   <span className="flex-1 ms-3 whitespace-nowrap">
                     Actividades
                   </span>
-                </a>
+                </div>
               </li>
             ) : null}
             {accessMonitor.verifyPermissions("DOCS.READ") ? (

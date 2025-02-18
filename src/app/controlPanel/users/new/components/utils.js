@@ -8,7 +8,7 @@ export class PermissionApi {
      * @param {String} nameSpace namespace
      */
     constructor(nameSpace) {
-        this.server = `https://prolabback.onrender.com/`
+        this.server = `${process.env.server_host}${process.env.server_port}/`
         this.nameSpace = nameSpace;
     }
 
@@ -30,7 +30,7 @@ export class UserApi {
      * @param {String} nameSpace namespace
      */
     constructor(nameSpace) {
-        this.server = `https://prolabback.onrender.com/`
+        this.server = `${process.env.server_host}${process.env.server_port}/`
         this.nameSpace = nameSpace;
     }
 

@@ -1,15 +1,17 @@
 "use client";
-import { Modal, Button } from "flowbite-react";
+import { Modal, Button} from "flowbite-react";
 import React, { useEffect, useState } from "react";
 import Menu from "../components/Menu";
 import { useRouter } from "next/navigation";
 import { UserApi } from "./new/components/utils";
 import LoadingCard from "../components/LoadingCard";
+import EditUserModal from "./new/components/EditUserModal";
 
 type User = {
   user: string;
   name: string;
   permissions: Array<string>;
+  email: string;
   id: string;
 };
 
@@ -20,6 +22,7 @@ export default function Home() {
   const [users, setUsers] = useState<Array<User>>([]);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [modalOptionsView, setModalOptionsView] = useState<boolean>(false);
+  const [showEditModal, setShowEditModal] = useState<boolean>(false);
   const [loadingAction, setLoadingAction] = useState(false);
 
   useEffect(() => {
@@ -66,6 +69,11 @@ export default function Home() {
     }
   };
 
+  const hideOptionsAndShowEditModal = () => {
+    setModalOptionsView(false);
+    setShowEditModal(true);
+  };
+
   return (
     <Menu>
       <div className="p-4 border-gray-200 rounded-lg dark:border-gray-700 mt-14">
@@ -75,7 +83,6 @@ export default function Home() {
           </h5>
           <p className="font-normal text-gray-700 dark:text-gray-400">
             Módulo de administración de usuarios y permisos
-            {modalOptionsView ? "true" : "false"}
           </p>
         </div>
         <div className="lg:flex justify-between px-5 mb-5">
@@ -254,49 +261,67 @@ export default function Home() {
         </div>
         <Modal
           show={modalOptionsView}
-          size={'5xl'}
+          size={"5xl"}
           onClose={() => setModalOptionsView(false)}
         >
           <Modal.Header>Opciones</Modal.Header>
           <Modal.Body>
-            <Modal.Body>
-                  <div className="p-4 md:p-5 space-y-4">
-                    <div className="block cursor-pointer max-w-full p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
-                      <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
-                        Editar
-                      </h5>
-                      <p className="font-normal text-gray-700 dark:text-gray-400">
-                        Modifica la información editable de este usuario como
-                        nombre, usuario y permisos
-                      </p>
-                    </div>
-                    <div
-                      className="block cursor-pointer max-w-full p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700"
-                      onClick={() => deleteUser()}
-                    >
-                      <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
-                        Eliminar
-                      </h5>
-                      <p className="font-normal text-gray-700 dark:text-gray-400">
-                        Elimina un usuario, todas sus contribuciones quedarán
-                        bajo su nombre
-                      </p>
-                    </div>
-                    <div className="block cursor-pointer max-w-full p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
-                      <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
-                        Restablecer contraseña
-                      </h5>
-                      <p className="font-normal text-gray-700 dark:text-gray-400">
-                        Ayuda a este usuario a restablecer su contraseña
-                      </p>
-                    </div>
-                  </div>
-            </Modal.Body>
+            <div
+              className="p-4 md:p-5 space-y-4"
+              onClick={() => hideOptionsAndShowEditModal()}
+            >
+              <div className="block cursor-pointer max-w-full p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
+                <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+                  Editar
+                </h5>
+                <p className="font-normal text-gray-700 dark:text-gray-400">
+                  Modifica la información editable de este usuario como nombre,
+                  usuario y permisos
+                </p>
+              </div>
+              <div
+                className="block cursor-pointer max-w-full p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700"
+                onClick={() => deleteUser()}
+              >
+                <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+                  Eliminar
+                </h5>
+                <p className="font-normal text-gray-700 dark:text-gray-400">
+                  Elimina un usuario, todas sus contribuciones quedarán bajo su
+                  nombre
+                </p>
+              </div>
+              <div className="block cursor-pointer max-w-full p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
+                <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+                  Restablecer contraseña
+                </h5>
+                <p className="font-normal text-gray-700 dark:text-gray-400">
+                  Ayuda a este usuario a restablecer su contraseña
+                </p>
+              </div>
+            </div>
           </Modal.Body>
           <Modal.Footer>
-            <Button disabled={loadingAction} onClick={() => setModalOptionsView(false)}>Aceptar</Button>
+            <div className="flex justify-end">
+              <Button
+                disabled={loadingAction}
+                color="warning"
+                onClick={() => setModalOptionsView(false)}
+              >
+                Aceptar
+              </Button>
+            </div>
           </Modal.Footer>
         </Modal>
+        <EditUserModal 
+          showModal={showEditModal}
+          onClose={() => setShowEditModal(false)}
+          onCancel={() => {
+            setShowEditModal(false);
+            setModalOptionsView(true);
+          }}
+          selectedUser={selectedUser}
+        />
       </div>
     </Menu>
   );
